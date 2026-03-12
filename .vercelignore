@@ -1,0 +1,7 @@
+Antigravity.exe
+node_modules
+.next
+.git
+.vercel
+*.exe
+app/belleza/Antigravity.exe

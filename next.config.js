@@ -1,5 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  allowedDevOrigins: [
+    "tech.localhost",
+    "beauty.localhost",
+    "belleza.localhost",
+    "hogar.localhost",
+  ],
   images: {
     remotePatterns: [
       {

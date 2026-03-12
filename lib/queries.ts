@@ -148,7 +148,7 @@ export async function getProductByHandle(
 // ─── Formatters ───────────────────────────────────────────────────────────────
 
 /** Formatea el precio a moneda local */
-export function formatPrice(amount: string, currencyCode = "USD"): string {
+export function formatPrice(amount: string , currencyCode = "USD"): string {
   return new Intl.NumberFormat("es-CO", {
     style: "currency",
     currency: currencyCode,

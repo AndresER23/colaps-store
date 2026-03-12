@@ -14,7 +14,19 @@ export const tenants: Record<string, TenantConfig> = {
     subdomain: "tech",
     domain: "tech.colaps.store",
   },
+  tecnologia: {
+    slug: "tecnologia",
+    name: "Colaps Tech",
+    subdomain: "tech",
+    domain: "tech.colaps.store",
+  },
   beauty: {
+    slug: "belleza",
+    name: "Colaps Beauty",
+    subdomain: "beauty",
+    domain: "beauty.colaps.store",
+  },
+  belleza: {
     slug: "belleza",
     name: "Colaps Beauty",
     subdomain: "beauty",
@@ -31,11 +43,11 @@ export const tenants: Record<string, TenantConfig> = {
 /** Devuelve el tenant según el hostname del request */
 export function getTenantFromHost(host: string): TenantConfig {
   // Extraer subdominio: "tech.colaps.store" → "tech"
-  const subdomain = host.split(".")[0];
+  const subdomain = host.split(".")[0].toLowerCase();
 
-  // Fallback para localhost o dominio raíz
-  if (subdomain === "localhost" || subdomain === "colaps" || !tenants[subdomain]) {
-    return tenants.tech; // default
+  // Si no coincide con un tenant conocido, es el landing principal o default
+  if (!tenants[subdomain]) {
+    return tenants.tech;
   }
 
   return tenants[subdomain];

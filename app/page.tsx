@@ -6,14 +6,18 @@ import { getCollectionProducts } from "@/lib/queries";
 
 const theme = themes.tecnologia;
 
-export default async function TecnologiaPage() {
+export default async function HomePage() {
   const products = await getCollectionProducts("tecnologia", 12);
   const featured = products[0] ?? null;
 
   return (
     <ThemeProvider theme={theme}>
       <HeroSection theme={theme} featuredProduct={featured} />
-      <ProductGrid products={products} categorySlug="tecnologia" title="Productos" />
+      <ProductGrid 
+        products={products} 
+        categorySlug="tecnologia" 
+        title="Ofertas Destacadas" 
+      />
     </ThemeProvider>
   );
 }
