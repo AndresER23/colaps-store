@@ -1,0 +1,372 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import type { ShopifyProduct } from "@/lib/queries";
+import { formatPrice, hasDiscount } from "@/lib/queries";
+
+interface ProductDetailProps {
+    product: ShopifyProduct;
+    categorySlug: string;
+    relatedProducts?: ShopifyProduct[];
+}
+
+export function ProductDetail({
+    product,
+    categorySlug,
+    relatedProducts = [],
+}: ProductDetailProps) {
+    const images = product.images.edges.map((e) => e.node);
+    const [selectedImage, setSelectedImage] = useState(0);
+    const [selectedVariant, setSelectedVariant] = useState(0);
+    const [quantity, setQuantity] = useState(1);
+    const [added, setAdded] = useState(false);
+
+    const variants = product.variants.edges.map((e) => e.node);
+    const currentVariant = variants[selectedVariant];
+
+    const price = formatPrice(
+        currentVariant?.price.amount || product.priceRange.minVariantPrice.amount,
+        currentVariant?.price.currencyCode || product.priceRange.minVariantPrice.currencyCode
+    );
+
+    const isOnSale = hasDiscount(product);
+    const comparePrice = isOnSale
+        ? formatPrice(product.compareAtPriceRange.minVariantPrice.amount)
+        : null;
+
+    const handleAddToCart = () => {
+        setAdded(true);
+        setTimeout(() => setAdded(false), 2000);
+        // TODO: integrar con carrito global
+    };
+
+    return (
+        <div
+            className="min-h-screen"
+            style={{ background: "var(--color-bg)" }}
+        >
+            {/* Breadcrumb */}
+            <div className="max-w-[1280px] mx-auto px-6 pt-6 pb-2">
+                <div className="flex items-center gap-2 text-xs" style={{ color: "var(--color-text-muted)" }}>
+                    <Link href="/" className="hover:opacity-70 transition-opacity">Inicio</Link>
+                    <span>›</span>
+                    <Link href={`/${categorySlug}`} className="hover:opacity-70 transition-opacity capitalize">{categorySlug}</Link>
+                    <span>›</span>
+                    <span className="line-clamp-1">{product.title}</span>
+                </div>
+            </div>
+
+            {/* Main product section */}
+            <div className="max-w-[1280px] mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-2 gap-12">
+
+                {/* Image gallery */}
+                <div className="space-y-3">
+                    {/* Main image */}
+                    <div
+                        className="relative aspect-square rounded-2xl overflow-hidden"
+                        style={{ background: "var(--color-bg-secondary)" }}
+                    >
+                        {images[selectedImage] ? (
+                            <Image
+                                src={images[selectedImage].url}
+                                alt={images[selectedImage].altText || product.title}
+                                fill
+                                className="object-contain p-6"
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                                priority
+                            />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                                <span className="text-8xl opacity-20">📦</span>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Thumbnails */}
+                    {images.length > 1 && (
+                        <div className="flex gap-2">
+                            {images.map((img, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => setSelectedImage(i)}
+                                    className="relative w-16 h-16 rounded-xl overflow-hidden transition-all"
+                                    style={{
+                                        background: "var(--color-bg-secondary)",
+                                        border: selectedImage === i
+                                            ? "2px solid var(--color-accent)"
+                                            : "2px solid transparent",
+                                        opacity: selectedImage === i ? 1 : 0.6,
+                                    }}
+                                >
+                                    <Image
+                                        src={img.url}
+                                        alt={img.altText || `Imagen ${i + 1}`}
+                                        fill
+                                        className="object-contain p-1"
+                                        sizes="64px"
+                                    />
+                                </button>
+                            ))}
+                            {images.length > 4 && (
+                                <div
+                                    className="w-16 h-16 rounded-xl flex items-center justify-center text-xs font-medium"
+                                    style={{
+                                        background: "var(--color-bg-secondary)",
+                                        color: "var(--color-text-muted)",
+                                    }}
+                                >
+                                    +{images.length - 4}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* Product info */}
+                <div className="space-y-6">
+                    {/* Tags */}
+                    {product.tags.length > 0 && (
+                        <div className="flex gap-2 flex-wrap">
+                            {product.tags.slice(0, 3).map((tag) => (
+                                <span
+                                    key={tag}
+                                    className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
+                                    style={{
+                                        background: "color-mix(in srgb, var(--color-accent) 12%, transparent)",
+                                        color: "var(--color-accent)",
+                                    }}
+                                >
+                                    {tag}
+                                </span>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Title */}
+                    <h1
+                        className="text-3xl lg:text-4xl font-black leading-tight"
+                        style={{
+                            fontFamily: "var(--font-display)",
+                            color: "var(--color-text)",
+                        }}
+                    >
+                        {product.title}
+                    </h1>
+
+                    {/* Price */}
+                    <div className="flex items-baseline gap-3">
+                        <span
+                            className="text-3xl font-black"
+                            style={{ color: "var(--color-accent)" }}
+                        >
+                            {price}
+                        </span>
+                        {comparePrice && (
+                            <span
+                                className="text-lg line-through"
+                                style={{ color: "var(--color-text-muted)" }}
+                            >
+                                {comparePrice}
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Description */}
+                    {product.description && (
+                        <p
+                            className="text-sm leading-relaxed"
+                            style={{ color: "var(--color-text-muted)" }}
+                        >
+                            {product.description}
+                        </p>
+                    )}
+
+                    {/* Variants */}
+                    {variants.length > 1 && (
+                        <div>
+                            <p
+                                className="text-xs font-semibold uppercase tracking-wider mb-2"
+                                style={{ color: "var(--color-text-muted)" }}
+                            >
+                                Variante
+                            </p>
+                            <div className="flex gap-2 flex-wrap">
+                                {variants.map((v, i) => (
+                                    <button
+                                        key={v.id}
+                                        onClick={() => setSelectedVariant(i)}
+                                        disabled={!v.availableForSale}
+                                        className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
+                                        style={{
+                                            background: selectedVariant === i
+                                                ? "var(--color-accent)"
+                                                : "color-mix(in srgb, var(--color-text) 6%, transparent)",
+                                            color: selectedVariant === i
+                                                ? "#fff"
+                                                : "var(--color-text)",
+                                            border: selectedVariant === i
+                                                ? "2px solid var(--color-accent)"
+                                                : "2px solid color-mix(in srgb, var(--color-text) 10%, transparent)",
+                                            opacity: v.availableForSale ? 1 : 0.4,
+                                        }}
+                                    >
+                                        {v.title}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Quantity + Add to cart */}
+                    <div className="flex gap-3 items-center">
+                        {/* Quantity */}
+                        <div
+                            className="flex items-center rounded-xl overflow-hidden"
+                            style={{
+                                background: "var(--color-bg-secondary)",
+                                border: "1px solid color-mix(in srgb, var(--color-text) 8%, transparent)",
+                            }}
+                        >
+                            <button
+                                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                className="w-10 h-12 flex items-center justify-center text-lg font-bold transition-opacity hover:opacity-60"
+                                style={{ color: "var(--color-text)" }}
+                            >
+                                −
+                            </button>
+                            <span
+                                className="w-10 text-center font-semibold text-sm"
+                                style={{ color: "var(--color-text)" }}
+                            >
+                                {quantity}
+                            </span>
+                            <button
+                                onClick={() => setQuantity(quantity + 1)}
+                                className="w-10 h-12 flex items-center justify-center text-lg font-bold transition-opacity hover:opacity-60"
+                                style={{ color: "var(--color-text)" }}
+                            >
+                                +
+                            </button>
+                        </div>
+
+                        {/* Add to cart button */}
+                        <button
+                            onClick={handleAddToCart}
+                            className="flex-1 h-12 rounded-xl font-bold text-sm text-white transition-all hover:opacity-90 hover:scale-[1.01]"
+                            style={{
+                                background: added
+                                    ? "color-mix(in srgb, var(--color-accent) 80%, #000)"
+                                    : "var(--color-accent)",
+                            }}
+                        >
+                            {added ? "✓ Agregado al carrito" : "Agregar al carrito"}
+                        </button>
+                    </div>
+
+                    {/* Trust badges */}
+                    <div
+                        className="grid grid-cols-3 gap-3 p-4 rounded-2xl"
+                        style={{
+                            background: "var(--color-bg-secondary)",
+                            border: "1px solid color-mix(in srgb, var(--color-text) 5%, transparent)",
+                        }}
+                    >
+                        {[
+                            { icon: "🚚", text: "Envío gratis" },
+                            { icon: "💵", text: "Contraentrega" },
+                            { icon: "🛡️", text: "Garantía 30 días" },
+                        ].map((b) => (
+                            <div key={b.text} className="flex flex-col items-center gap-1 text-center">
+                                <span className="text-xl">{b.icon}</span>
+                                <span
+                                    className="text-[10px] font-medium leading-tight"
+                                    style={{ color: "var(--color-text-muted)" }}
+                                >
+                                    {b.text}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* Related products */}
+            {relatedProducts.length > 0 && (
+                <div className="max-w-[1280px] mx-auto px-6 py-10">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div
+                            className="w-1 h-6 rounded-full"
+                            style={{ background: "var(--color-accent)" }}
+                        />
+                        <h2
+                            className="text-xl font-bold"
+                            style={{
+                                fontFamily: "var(--font-display)",
+                                color: "var(--color-text)",
+                            }}
+                        >
+                            También te puede gustar
+                        </h2>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {relatedProducts.slice(0, 4).map((p) => (
+                            <Link
+                                key={p.id}
+                                href={`/${categorySlug}/${p.handle}`}
+                                className="block rounded-2xl overflow-hidden transition-all hover:-translate-y-1"
+                                style={{
+                                    background: "var(--color-card-bg)",
+                                    border: "1px solid color-mix(in srgb, var(--color-text) 6%, transparent)",
+                                }}
+                            >
+                                <div
+                                    className="relative h-40"
+                                    style={{ background: "var(--color-bg-secondary)" }}
+                                >
+                                    {p.images.edges[0] && (
+                                        <Image
+                                            src={p.images.edges[0].node.url}
+                                            alt={p.title}
+                                            fill
+                                            className="object-cover"
+                                            sizes="25vw"
+                                        />
+                                    )}
+                                </div>
+                                <div className="p-3">
+                                    <p
+                                        className="text-xs font-semibold line-clamp-2 mb-1"
+                                        style={{ color: "var(--color-text)" }}
+                                    >
+                                        {p.title}
+                                    </p>
+                                    <p
+                                        className="text-sm font-bold"
+                                        style={{ color: "var(--color-accent)" }}
+                                    >
+                                        {formatPrice(
+                                            p.priceRange.minVariantPrice.amount,
+                                            p.priceRange.minVariantPrice.currencyCode
+                                        )}
+                                    </p>
+                                    <button
+                                        className="mt-2 w-full py-1.5 rounded-lg text-[11px] font-semibold transition-all"
+                                        style={{
+                                            background: "color-mix(in srgb, var(--color-accent) 10%, transparent)",
+                                            color: "var(--color-accent)",
+                                            border: "1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)",
+                                        }}
+                                    >
+                                        Add to Cart
+                                    </button>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
