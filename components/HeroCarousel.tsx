@@ -9,250 +9,325 @@ import { getSalePrice } from "@/lib/pricing";
 import type { CategoryTheme } from "@/lib/themes";
 
 interface HeroCarouselProps {
-    theme: CategoryTheme;
-    products: ShopifyProduct[];
+  theme: CategoryTheme;
+  products: ShopifyProduct[];
+}
+
+// Detecta el tipo de promo desde los tags del producto
+function getPromoType(tags: string[]): { label: string; color: string } | null {
+  const upper = tags.map((t) => t.toUpperCase());
+  if (upper.some((t) => t.includes("2X1"))) return { label: "2X1", color: "#ff3b30" };
+  if (upper.some((t) => t.includes("COMBO"))) return { label: "COMBO", color: "#ff6b00" };
+  if (upper.some((t) => t.includes("NUEVO") || t.includes("NEW"))) return { label: "NUEVO", color: "#34c759" };
+  if (upper.some((t) => t.includes("HOT") || t.includes("VIRAL"))) return { label: "🔥 VIRAL", color: "#ff3b30" };
+  return null;
+}
+
+function Countdown() {
+  const [time, setTime] = useState({ h: 0, m: 0, s: 0 });
+
+  useEffect(() => {
+    // Genera un tiempo aleatorio entre 1-23h para urgencia
+    const endTime = Date.now() + (Math.floor(Math.random() * 22) + 1) * 3600000 + Math.random() * 3600000;
+
+    const tick = () => {
+      const diff = Math.max(0, endTime - Date.now());
+      setTime({
+        h: Math.floor(diff / 3600000),
+        m: Math.floor((diff % 3600000) / 60000),
+        s: Math.floor((diff % 60000) / 1000),
+      });
+    };
+
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const pad = (n: number) => String(n).padStart(2, "0");
+
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-xs font-bold uppercase tracking-wider text-red-400">
+        ⏰ Oferta termina en:
+      </span>
+      <div className="flex items-center gap-1">
+        {[pad(time.h), pad(time.m), pad(time.s)].map((val, i) => (
+          <span key={i} className="flex items-center gap-1">
+            <span
+              className="inline-block min-w-[32px] text-center px-1.5 py-0.5 rounded-md text-sm font-black tabular-nums"
+              style={{ background: "#ff3b30", color: "#fff" }}
+            >
+              {val}
+            </span>
+            {i < 2 && <span className="text-red-400 font-black text-sm">:</span>}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export function HeroCarousel({ theme, products }: HeroCarouselProps) {
-    const [current, setCurrent] = useState(0);
-    const [isAnimating, setIsAnimating] = useState(false);
-    const [direction, setDirection] = useState<"next" | "prev">("next");
+  const [current, setCurrent] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [direction, setDirection] = useState<"next" | "prev">("next");
 
-    const goTo = useCallback(
-        (index: number, dir: "next" | "prev" = "next") => {
-            if (isAnimating || index === current) return;
-            setDirection(dir);
-            setIsAnimating(true);
-            setTimeout(() => {
-                setCurrent(index);
-                setIsAnimating(false);
-            }, 300);
-        },
-        [isAnimating, current]
-    );
+  const goTo = useCallback(
+    (index: number, dir: "next" | "prev" = "next") => {
+      if (isAnimating || index === current) return;
+      setDirection(dir);
+      setIsAnimating(true);
+      setTimeout(() => {
+        setCurrent(index);
+        setIsAnimating(false);
+      }, 350);
+    },
+    [isAnimating, current]
+  );
 
-    const goNext = useCallback(() => {
-        goTo((current + 1) % products.length, "next");
-    }, [current, products.length, goTo]);
+  const goNext = useCallback(() => {
+    goTo((current + 1) % products.length, "next");
+  }, [current, products.length, goTo]);
 
-    const goPrev = useCallback(() => {
-        goTo((current - 1 + products.length) % products.length, "prev");
-    }, [current, products.length, goTo]);
+  const goPrev = useCallback(() => {
+    goTo((current - 1 + products.length) % products.length, "prev");
+  }, [current, products.length, goTo]);
 
-    // Auto-rotate every 4 seconds
-    useEffect(() => {
-        if (products.length <= 1) return;
-        const timer = setInterval(goNext, 4000);
-        return () => clearInterval(timer);
-    }, [goNext, products.length]);
+  useEffect(() => {
+    if (products.length <= 1) return;
+    const timer = setInterval(goNext, 5000);
+    return () => clearInterval(timer);
+  }, [goNext, products.length]);
 
-    if (!products.length) return null;
+  if (!products.length) return null;
 
-    const product = products[current];
-    const imageUrl = getProductImage(product);
-    const price = getSalePrice(product.priceRange.minVariantPrice.amount);
-    const hasCompare =
-        parseFloat(product.compareAtPriceRange.minVariantPrice.amount) >
-        parseFloat(product.priceRange.minVariantPrice.amount);
-    const comparePrice = hasCompare
-        ? getSalePrice(product.compareAtPriceRange.minVariantPrice.amount)
-        : null;
-    const discountPct = hasCompare
-        ? Math.round(
-            (1 -
-                parseFloat(product.priceRange.minVariantPrice.amount) /
-                parseFloat(product.compareAtPriceRange.minVariantPrice.amount)) *
-            100
-        )
-        : null;
+  const product = products[current];
+  const imageUrl = getProductImage(product);
+  const price = getSalePrice(product.priceRange.minVariantPrice.amount);
+  const rawCost = parseFloat(product.priceRange.minVariantPrice.amount);
+  const rawCompare = parseFloat(product.compareAtPriceRange.minVariantPrice.amount);
+  const hasDiscount = rawCompare > rawCost;
+  const discountPct = hasDiscount ? Math.round((1 - rawCost / rawCompare) * 100) : null;
+  const comparePrice = hasDiscount ? getSalePrice(rawCompare.toString()) : null;
+  const promoType = getPromoType(product.tags || []);
 
-    const slideStyle = {
-        opacity: isAnimating ? 0 : 1,
-        transform: isAnimating
-            ? `translateX(${direction === "next" ? "-20px" : "20px"})`
-            : "translateX(0)",
-        transition: "opacity 0.3s ease, transform 0.3s ease",
-    };
+  const slideStyle = {
+    opacity: isAnimating ? 0 : 1,
+    transform: isAnimating
+      ? `translateX(${direction === "next" ? "-24px" : "24px"})`
+      : "translateX(0)",
+    transition: "opacity 0.35s ease, transform 0.35s ease",
+  };
 
-    return (
-        <section
-            className="relative overflow-hidden mx-4 my-4 rounded-3xl"
-            style={{
-                background: `linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 15%, var(--color-bg)) 0%, var(--color-bg) 100%)`,
-                border: "1px solid color-mix(in srgb, var(--color-accent) 15%, transparent)",
-                minHeight: "420px",
-            }}
-        >
-            {/* Glow */}
-            <div
-                className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl pointer-events-none transition-all duration-700"
-                style={{
-                    background: `radial-gradient(circle, color-mix(in srgb, var(--color-accent) 25%, transparent) 0%, transparent 70%)`,
-                }}
-            />
+  return (
+    <section
+      className="relative overflow-hidden mx-4 my-4 rounded-3xl"
+      style={{
+        background: "linear-gradient(135deg, #0a0a0f 0%, #111827 100%)",
+        border: "1px solid rgba(255,59,48,0.2)",
+        minHeight: "440px",
+      }}
+    >
+      {/* Fondo con glow rojo de urgencia */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: "radial-gradient(ellipse at 80% 50%, rgba(255,59,48,0.08) 0%, transparent 60%)",
+        }}
+      />
+      {/* Línea superior de acento rojo */}
+      <div
+        className="absolute top-0 left-0 right-0 h-0.5"
+        style={{ background: "linear-gradient(90deg, transparent, #ff3b30, transparent)" }}
+      />
 
-            <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 items-center px-10 py-14 lg:px-16">
-                {/* Text side */}
-                <div className="space-y-5 z-10" style={slideStyle}>
-                    {/* Badges */}
-                    <div className="flex gap-2 flex-wrap">
-                        {discountPct && (
-                            <span className="inline-block px-3 py-1 text-[10px] font-black tracking-widest uppercase rounded-full bg-red-500 text-white">
-                                -{discountPct}% OFF
-                            </span>
-                        )}
-                        {product.tags?.slice(0, 2).map((tag) => (
-                            <span
-                                key={tag}
-                                className="inline-block px-3 py-1 text-[10px] font-bold tracking-widest uppercase rounded-full text-white"
-                                style={{ background: "var(--color-accent)" }}
-                            >
-                                {tag}
-                            </span>
-                        ))}
-                    </div>
+      <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-6 items-center px-10 py-10 lg:px-16">
+        {/* Texto */}
+        <div className="space-y-4 z-10" style={slideStyle}>
 
-                    <h1
-                        className="text-4xl lg:text-5xl font-black leading-tight"
-                        style={{ fontFamily: "var(--font-display)", color: "var(--color-text)" }}
-                    >
-                        {product.title}
-                    </h1>
-
-                    <p
-                        className="text-sm leading-relaxed max-w-md"
-                        style={{ color: "var(--color-text-muted)" }}
-                    >
-                        {product.description?.slice(0, 120) || theme.tagline}
-                    </p>
-
-                    {/* Price */}
-                    <div className="flex items-baseline gap-3">
-                        <span
-                            className="text-3xl font-black"
-                            style={{ color: "var(--color-accent)" }}
-                        >
-                            {price}
-                        </span>
-                        {comparePrice && (
-                            <span
-                                className="text-base line-through opacity-50"
-                                style={{ color: "var(--color-text)" }}
-                            >
-                                {comparePrice}
-                            </span>
-                        )}
-                    </div>
-
-                    <div className="flex flex-wrap gap-3 items-center">
-                        <Link
-                            href={`/${theme.slug}/${product.handle}`}
-                            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:opacity-90 hover:scale-[1.02]"
-                            style={{ background: "var(--color-accent)" }}
-                        >
-                            Ver producto <span>→</span>
-                        </Link>
-                        <Link
-                            href={`/${theme.slug}`}
-                            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all"
-                            style={{
-                                background: "color-mix(in srgb, var(--color-text) 8%, transparent)",
-                                color: "var(--color-text)",
-                                border: "1px solid color-mix(in srgb, var(--color-text) 12%, transparent)",
-                            }}
-                        >
-                            Ver catálogo
-                        </Link>
-                    </div>
-
-                    {/* Trust badges */}
-                    <div className="flex gap-5 pt-1">
-                        {[
-                            { icon: "🚚", label: "Envío gratis" },
-                            { icon: "💵", label: "Contraentrega" },
-                            { icon: "🛡️", label: "Garantía 30 días" },
-                        ].map((b) => (
-                            <div key={b.label} className="flex items-center gap-1.5">
-                                <span className="text-sm">{b.icon}</span>
-                                <span className="text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>
-                                    {b.label}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Image side */}
-                <div className="relative flex items-center justify-center" style={slideStyle}>
-                    <div
-                        className="relative w-full max-w-sm aspect-square rounded-2xl overflow-hidden"
-                        style={{
-                            background: "color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-secondary))",
-                        }}
-                    >
-                        {imageUrl ? (
-                            <Image
-                                src={imageUrl}
-                                alt={product.title}
-                                fill
-                                className="object-contain p-8"
-                                sizes="(max-width: 768px) 100vw, 50vw"
-                                priority
-                            />
-                        ) : (
-                            <span className="text-8xl opacity-20 absolute inset-0 flex items-center justify-center">📦</span>
-                        )}
-                    </div>
-                </div>
+          {/* Countdown + badges */}
+          <div className="space-y-2">
+            <Countdown />
+            <div className="flex gap-2 flex-wrap">
+              {discountPct && (
+                <span
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-black tracking-wider uppercase text-white"
+                  style={{
+                    background: "linear-gradient(135deg, #ff3b30, #ff6b00)",
+                    boxShadow: "0 4px 15px rgba(255,59,48,0.4)",
+                  }}
+                >
+                  🔥 -{discountPct}% OFF
+                </span>
+              )}
+              {promoType && (
+                <span
+                  className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-black tracking-wider uppercase text-white"
+                  style={{
+                    background: promoType.color,
+                    boxShadow: `0 4px 15px ${promoType.color}66`,
+                  }}
+                >
+                  {promoType.label}
+                </span>
+              )}
             </div>
+          </div>
 
-            {/* Controls — solo si hay más de 1 producto */}
-            {products.length > 1 && (
-                <>
-                    {/* Prev / Next arrows */}
-                    <button
-                        onClick={goPrev}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110"
-                        style={{
-                            background: "color-mix(in srgb, var(--color-text) 10%, transparent)",
-                            border: "1px solid color-mix(in srgb, var(--color-text) 15%, transparent)",
-                            color: "var(--color-text)",
-                        }}
-                    >
-                        ←
-                    </button>
-                    <button
-                        onClick={goNext}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110"
-                        style={{
-                            background: "color-mix(in srgb, var(--color-text) 10%, transparent)",
-                            border: "1px solid color-mix(in srgb, var(--color-text) 15%, transparent)",
-                            color: "var(--color-text)",
-                        }}
-                    >
-                        →
-                    </button>
+          {/* Título */}
+          <h1
+            className="text-3xl lg:text-5xl font-black leading-tight text-white"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            {product.title}
+          </h1>
 
-                    {/* Dots */}
-                    <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
-                        {products.map((_, i) => (
-                            <button
-                                key={i}
-                                onClick={() => goTo(i, i > current ? "next" : "prev")}
-                                className="rounded-full transition-all duration-300"
-                                style={{
-                                    width: i === current ? "20px" : "6px",
-                                    height: "6px",
-                                    background:
-                                        i === current
-                                            ? "var(--color-accent)"
-                                            : "color-mix(in srgb, var(--color-text) 25%, transparent)",
-                                }}
-                            />
-                        ))}
-                    </div>
-                </>
+          {/* Descripción */}
+          <p className="text-sm leading-relaxed text-slate-400 max-w-md">
+            {product.description?.slice(0, 100) || theme.tagline}
+          </p>
+
+          {/* Precios */}
+          <div className="flex items-baseline gap-3">
+            <span className="text-4xl font-black text-white">{price}</span>
+            {comparePrice && (
+              <div className="flex flex-col">
+                <span className="text-sm line-through text-slate-500">{comparePrice}</span>
+                {discountPct && (
+                  <span className="text-xs font-bold text-red-400">Ahorrás {discountPct}%</span>
+                )}
+              </div>
             )}
-        </section>
-    );
+          </div>
+
+          {/* CTAs */}
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href={`/${theme.slug}/${product.handle}`}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-black text-sm text-white transition-all hover:scale-[1.03]"
+              style={{
+                background: "linear-gradient(135deg, #ff3b30, #ff6b00)",
+                boxShadow: "0 8px 25px rgba(255,59,48,0.35)",
+              }}
+            >
+              ¡Lo quiero! →
+            </Link>
+            <Link
+              href={`/${theme.slug}`}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-slate-300 transition-all hover:text-white"
+              style={{
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
+            >
+              Ver todo
+            </Link>
+          </div>
+
+          {/* Trust badges */}
+          <div className="flex gap-4 pt-1">
+            {[
+              { icon: "🚚", label: "Envío gratis" },
+              { icon: "💵", label: "Contraentrega" },
+              { icon: "🛡️", label: "Garantía 30d" },
+            ].map((b) => (
+              <div key={b.label} className="flex items-center gap-1.5">
+                <span className="text-sm">{b.icon}</span>
+                <span className="text-xs text-slate-400">{b.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Imagen */}
+        <div className="relative flex items-center justify-center" style={slideStyle}>
+          {/* Glow detrás de la imagen */}
+          <div
+            className="absolute inset-0 rounded-2xl blur-2xl"
+            style={{ background: "radial-gradient(circle, rgba(255,59,48,0.15) 0%, transparent 70%)" }}
+          />
+          <div
+            className="relative w-full max-w-sm aspect-square rounded-2xl overflow-hidden"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+          >
+            {imageUrl ? (
+              <Image
+                src={imageUrl}
+                alt={product.title}
+                fill
+                className="object-contain p-6 hover:scale-105 transition-transform duration-500"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
+              />
+            ) : (
+              <span className="text-8xl opacity-10 absolute inset-0 flex items-center justify-center">📦</span>
+            )}
+          </div>
+
+          {/* Badge de descuento flotante */}
+          {discountPct && (
+            <div
+              className="absolute -top-3 -right-3 w-16 h-16 rounded-full flex flex-col items-center justify-center text-white font-black"
+              style={{
+                background: "linear-gradient(135deg, #ff3b30, #ff6b00)",
+                boxShadow: "0 4px 20px rgba(255,59,48,0.5)",
+                fontSize: "11px",
+              }}
+            >
+              <span className="text-lg leading-none">-{discountPct}</span>
+              <span className="text-[9px]">%OFF</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Controles */}
+      {products.length > 1 && (
+        <>
+          <button
+            onClick={goPrev}
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-all hover:scale-110"
+            style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
+          >
+            ←
+          </button>
+          <button
+            onClick={goNext}
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-all hover:scale-110"
+            style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}
+          >
+            →
+          </button>
+
+          {/* Dots */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+            {products.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goTo(i, i > current ? "next" : "prev")}
+                className="rounded-full transition-all duration-300"
+                style={{
+                  width: i === current ? "24px" : "6px",
+                  height: "6px",
+                  background: i === current ? "#ff3b30" : "rgba(255,255,255,0.2)",
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Progress bar */}
+          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/5">
+            <div
+              className="h-full bg-red-500"
+              style={{
+                width: `${((current + 1) / products.length) * 100}%`,
+                transition: "width 0.3s ease",
+              }}
+            />
+          </div>
+        </>
+      )}
+    </section>
+  );
 }
