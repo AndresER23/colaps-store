@@ -1,18 +1,22 @@
 import { themes } from "@/lib/themes";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { HeroSection } from "@/components/HeroSection";
+import { HeroCarousel } from "@/components/HeroCarousel";
 import { ProductGrid } from "@/components/ProductGrid";
 import { getCollectionProducts } from "@/lib/queries";
 
 const theme = themes.hogar;
 
 export default async function HogarPage() {
-  const products = await getCollectionProducts("hogar", 12);
-  const featured = products[0] ?? null;
+  const [featured, products] = await Promise.all([
+    getCollectionProducts("featured-hogar", 5),
+    getCollectionProducts("hogar", 12),
+  ]);
+
+  const heroProducts = featured.length > 0 ? featured : products.slice(0, 3);
 
   return (
     <ThemeProvider theme={theme}>
-      <HeroSection theme={theme} featuredProduct={featured} />
+      <HeroCarousel theme={theme} products={heroProducts} />
       <ProductGrid products={products} categorySlug="hogar" title="Productos" />
     </ThemeProvider>
   );
