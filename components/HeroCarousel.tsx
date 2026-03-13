@@ -7,6 +7,7 @@ import type { ShopifyProduct } from "@/lib/queries";
 import { getProductImage } from "@/lib/queries";
 import { getSalePrice } from "@/lib/pricing";
 import type { CategoryTheme } from "@/lib/themes";
+import { AddToCartButton } from "./AddToCartButton";
 
 interface HeroCarouselProps {
   theme: CategoryTheme;
@@ -203,16 +204,12 @@ export function HeroCarousel({ theme, products }: HeroCarouselProps) {
 
           {/* CTAs */}
           <div className="flex flex-wrap gap-3">
-            <Link
-              href={`/${theme.slug}/${product.handle}`}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-black text-sm text-white transition-all hover:scale-[1.03]"
-              style={{
-                background: "linear-gradient(135deg, #ff3b30, #ff6b00)",
-                boxShadow: "0 8px 25px rgba(255,59,48,0.35)",
-              }}
+            <AddToCartButton
+              product={product}
+              variant="hero"
             >
               ¡Lo quiero! →
-            </Link>
+            </AddToCartButton>
             <Link
               href={`/${theme.slug}`}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-slate-300 transition-all hover:text-white"

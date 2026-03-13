@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CartBadge } from "./CartBadge";
 
 interface NavbarProps {
   storeName?: string;
@@ -36,9 +37,7 @@ export function Navbar({ storeName = "Colaps Store" }: NavbarProps) {
       </div>
 
       {/* Cart */}
-      <button className="text-xl bg-transparent border-none cursor-pointer">
-        🛒
-      </button>
+      <CartBadge />
     </nav>
   );
 }

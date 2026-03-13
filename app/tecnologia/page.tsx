@@ -12,9 +12,6 @@ export default async function TecnologiaPage() {
     getCollectionProducts("tecnologia", 12),
   ]);
 
-  console.log("featured-tecnologia count:", featured.length);
-  console.log("featured handles:", featured.map(p => p.handle));
-
   const heroProducts = featured.length > 0 ? featured : products.slice(0, 3);
 
   return (

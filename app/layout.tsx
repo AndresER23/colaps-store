@@ -5,6 +5,8 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { headers } from "next/headers";
 import { getTenantFromHost } from "@/lib/tenant";
+import { CartProvider } from "@/contexts/CartContext";
+import { CartDrawer } from "@/components/CartDrawer";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -20,9 +22,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" className={inter.variable}>
       <body>
-        <Navbar storeName={tenant.name} />
-        <main>{children}</main>
-        <Footer storeName={tenant.name} />
+        <CartProvider>
+          <Navbar storeName={tenant.name} />
+          <main>{children}</main>
+          <Footer storeName={tenant.name} />
+          <CartDrawer />
+        </CartProvider>
       </body>
     </html>
   );

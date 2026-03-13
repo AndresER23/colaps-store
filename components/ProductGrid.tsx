@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { ShopifyProduct } from "@/lib/queries";
 import { getProductImage } from "@/lib/queries";
 import { getSalePrice, getSaleDiscount } from "@/lib/pricing";
+import { AddToCartButton } from "./AddToCartButton";
 
 interface ProductGridProps {
     products: ShopifyProduct[];
@@ -92,17 +93,12 @@ function QuickBuyCard({ product, categorySlug }: { product: ShopifyProduct; cate
                     <span className="text-base font-bold" style={{ color: "var(--color-accent)" }}>
                         {price}
                     </span>
-                    <button
-                        onClick={handleQuickBuy}
-                        className="px-3 py-1.5 text-[11px] font-semibold rounded-lg transition-all duration-200 whitespace-nowrap"
-                        style={{
-                            background: added ? "var(--color-accent)" : "color-mix(in srgb, var(--color-accent) 10%, transparent)",
-                            color: added ? "#fff" : "var(--color-accent)",
-                            border: "1px solid color-mix(in srgb, var(--color-accent) 30%, transparent)",
-                        }}
+                    <AddToCartButton
+                        product={product}
+                        variant="primary"
                     >
-                        {added ? "✓ Listo" : "Quick Buy"}
-                    </button>
+                        ¡Lo quiero! →
+                    </AddToCartButton>
                 </div>
             </div>
         </Link>

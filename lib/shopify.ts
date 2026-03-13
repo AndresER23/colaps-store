@@ -18,7 +18,7 @@ export async function shopifyFetch<T>(
       "X-Shopify-Storefront-Access-Token": TOKEN,
     },
     body: JSON.stringify({ query, variables }),
-    next: { revalidate: 60 },
+    next: { revalidate: process.env.NODE_ENV === "development" ? 0 : 60 },
   });
 
   if (!res.ok) {

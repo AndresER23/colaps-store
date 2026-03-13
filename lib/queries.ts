@@ -6,6 +6,7 @@ export interface ShopifyProduct {
   id: string;
   title: string;
   handle: string;
+  vendor: string;
   description: string;
   tags: string[];
   priceRange: {
@@ -22,6 +23,7 @@ export interface ShopifyProduct {
   images: {
     edges: {
       node: {
+        id: string;
         url: string;
         altText: string | null;
       };
@@ -48,6 +50,7 @@ const PRODUCT_FIELDS = `
   id
   title
   handle
+  vendor
   description
   tags
   priceRange {
@@ -64,6 +67,7 @@ const PRODUCT_FIELDS = `
   images(first: 3) {
     edges {
       node {
+        id
         url
         altText
       }
