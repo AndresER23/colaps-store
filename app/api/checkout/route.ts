@@ -19,29 +19,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Crear checkout en Shopify
-    const checkoutCreateMutation = `
-      mutation checkoutCreate($input: CheckoutCreateInput!) {
-        checkoutCreate(input: $input) {
-          checkout {
+    // Crear carrito en Shopify usando la nueva API
+    const cartCreateMutation = `
+      mutation cartCreate($input: CartInput!) {
+        cartCreate(input: $input) {
+          cart {
             id
-            webUrl
-            totalPriceV2 {
-              amount
-              currencyCode
+            checkoutUrl
+            totalQuantity
+            cost {
+              totalAmount {
+                amount
+                currencyCode
+              }
             }
-            lineItems(first: 250) {
+            lines(first: 250) {
               edges {
                 node {
                   id
-                  title
                   quantity
+                  merchandise {
+                    ... on ProductVariant {
+                      id
+                      title
+                      product {
+                        title
+                      }
+                    }
+                  }
                 }
               }
             }
           }
-          checkoutUserErrors {
-            code
+          userErrors {
             field
             message
           }
@@ -51,8 +61,8 @@ export async function POST(request: NextRequest) {
 
     const variables = {
       input: {
-        lineItems: lineItems.map((item) => ({
-          variantId: item.variantId,
+        lines: lineItems.map((item) => ({
+          merchandiseId: item.variantId,
           quantity: item.quantity,
         })),
       },
@@ -67,7 +77,7 @@ export async function POST(request: NextRequest) {
           "X-Shopify-Storefront-Access-Token": STOREFRONT_ACCESS_TOKEN,
         },
         body: JSON.stringify({
-          query: checkoutCreateMutation,
+          query: cartCreateMutation,
           variables,
         }),
       }
@@ -87,27 +97,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (data.checkoutCreate.checkoutUserErrors.length > 0) {
-      console.error("Checkout errors:", data.checkoutCreate.checkoutUserErrors);
+    if (data.cartCreate.userErrors.length > 0) {
+      console.error("Cart errors:", data.cartCreate.userErrors);
       return NextResponse.json(
         {
-          error: "Checkout creation failed",
-          details: data.checkoutCreate.checkoutUserErrors,
+          error: "Cart creation failed",
+          details: data.cartCreate.userErrors,
         },
         { status: 400 }
       );
     }
 
-    const checkout = data.checkoutCreate.checkout;
+    const cart = data.cartCreate.cart;
 
     return NextResponse.json({
-      id: checkout.id,
-      webUrl: checkout.webUrl,
-      totalPrice: checkout.totalPriceV2.amount,
-      currency: checkout.totalPriceV2.currencyCode,
+      id: cart.id,
+      webUrl: cart.checkoutUrl,
+      totalPrice: cart.cost.totalAmount.amount,
+      currency: cart.cost.totalAmount.currencyCode,
     });
   } catch (error) {
-    console.error("Checkout creation error:", error);
+    console.error("Cart creation error:", error);
     return NextResponse.json(
       { error: "Internal server error", message: (error as Error).message },
       { status: 500 }
