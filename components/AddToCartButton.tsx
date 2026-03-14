@@ -62,7 +62,7 @@ export function AddToCartButton({
       "px-6 py-3 bg-slate-900 text-white rounded-xl hover:bg-slate-800 active:scale-95",
     secondary:
       "px-6 py-3 bg-white text-slate-900 border-2 border-slate-900 rounded-xl hover:bg-slate-50 active:scale-95",
-    hero: "px-8 py-4 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-xl hover:from-slate-800 hover:to-slate-700 text-base shadow-lg hover:shadow-xl active:scale-95",
+    hero: "px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-xl text-base shadow-[0_4px_20px_rgba(59,130,246,0.4)] hover:opacity-90 hover:scale-[1.01] active:scale-95",
   };
 
   return (

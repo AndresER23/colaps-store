@@ -211,14 +211,14 @@ export function HeroCarousel({ theme, products }: HeroCarouselProps) {
               ¡Lo quiero! →
             </AddToCartButton>
             <Link
-              href={`/${theme.slug}`}
+              href={`/${theme.slug}/${product.handle}`}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-slate-300 transition-all hover:text-white"
               style={{
                 background: "rgba(255,255,255,0.06)",
                 border: "1px solid rgba(255,255,255,0.1)",
               }}
             >
-              Ver todo
+              Ver más →
             </Link>
           </div>
 

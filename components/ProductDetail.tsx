@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { ShopifyProduct } from "@/lib/queries";
 import { getProductImage } from "@/lib/queries";
 import { getSalePrice } from "@/lib/pricing";
+import { AddToCartButton } from "./AddToCartButton";
 
 interface ProductDetailProps {
     product: ShopifyProduct;
@@ -228,16 +229,16 @@ export function ProductDetail({ product, categorySlug, relatedProducts = [] }: P
                         </div>
 
                         {/* Checkout Shopify */}
-                        <button
-                            className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl font-bold text-sm transition-all hover:opacity-90 hover:scale-[1.01]"
-                            style={{
-                                background: "var(--color-accent)",
-                                color: "#fff",
-                                boxShadow: "0 4px 20px color-mix(in srgb, var(--color-accent) 35%, transparent)",
-                            }}
+                        <AddToCartButton
+                            product={product}
+                            variantId={currentVariant?.id}
+                            quantity={quantity}
+                            variant="hero"
+                            className="w-full"
                         >
                             🛒 Agregar al carrito
-                        </button>
+                        </AddToCartButton>
+
                     </div>
 
                     {/* Trust badges */}

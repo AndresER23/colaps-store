@@ -18,7 +18,7 @@ export const PRICING = {
  */
 export function calcSalePrice(amount: string): number {
   const cost = parseFloat(amount);
-  return cost * (1 + PRICING.PROFIT_MARGIN) + PRICING.DELIVERY_COST;
+  return cost;
 }
 
 /**
