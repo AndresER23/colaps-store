@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const SHOPIFY_DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_DOMAIN!;
-const STOREFRONT_ACCESS_TOKEN = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN!;
+const SHOPIFY_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN!;
+const STOREFRONT_ACCESS_TOKEN = process.env.SHOPIFY_STOREFRONT_TOKEN!;
 
 interface LineItem {
   variantId: string;

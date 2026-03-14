@@ -2,8 +2,8 @@
 
 import { useCart } from "@/contexts/CartContext";
 import Image from "next/image";
-import { getProductImage } from "@/lib/queries";
-import { getSalePrice } from "@/lib/pricing";
+import { getProductImage, formatPrice } from "@/lib/queries";
+import { calcSalePrice } from "@/lib/pricing";
 
 export function CartDrawer() {
   const {
@@ -69,7 +69,7 @@ export function CartDrawer() {
             <div className="space-y-4">
               {items.map((item) => {
                 const imageUrl = getProductImage(item.product);
-                const price = parseFloat(item.product.priceRange.minVariantPrice.amount);
+                const price = calcSalePrice(item.product.priceRange.minVariantPrice.amount);
                 const total = price * item.quantity;
 
                 return (
@@ -99,7 +99,7 @@ export function CartDrawer() {
                         {item.product.title}
                       </h3>
                       <p className="text-sm text-slate-600 mt-0.5">
-                        {getSalePrice(price.toString())}
+                        {formatPrice(price.toString(), "COP")}
                       </p>
 
                       {/* Quantity controls */}
@@ -132,7 +132,7 @@ export function CartDrawer() {
                         🗑️
                       </button>
                       <p className="text-sm font-bold text-slate-900">
-                        {getSalePrice(total.toString())}
+                        {formatPrice(total.toString(), "COP")}
                       </p>
                     </div>
                   </div>
@@ -149,13 +149,13 @@ export function CartDrawer() {
             <div className="flex justify-between items-center">
               <span className="text-sm text-slate-600">Subtotal</span>
               <span className="text-xl font-bold text-slate-900">
-                {getSalePrice(subtotal.toString())}
+                {formatPrice(subtotal.toString(), "COP")}
               </span>
             </div>
 
             {/* Shipping notice */}
             <p className="text-xs text-slate-500 text-center">
-              Envío e impuestos calculados al finalizar la compra
+              Envío incluido
             </p>
 
             {/* Checkout button */}

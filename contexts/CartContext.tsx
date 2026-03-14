@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import type { ShopifyProduct } from "@/lib/queries";
+import { calcSalePrice } from "@/lib/pricing";
 
 export interface CartItem {
   product: ShopifyProduct;
@@ -112,7 +113,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const subtotal = items.reduce((sum, item) => {
-    const price = parseFloat(item.product.priceRange.minVariantPrice.amount);
+    const price = calcSalePrice(item.product.priceRange.minVariantPrice.amount);
     return sum + price * item.quantity;
   }, 0);
 
