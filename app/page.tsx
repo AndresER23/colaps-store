@@ -1,3 +1,4 @@
+// Trigger deployment with 3D animation - 2026-03-21
 import { themes } from "@/lib/themes";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { HeroCarousel } from "@/components/HeroCarousel";
