@@ -141,11 +141,10 @@ export function ScrollAnimation({ category, product }: ScrollAnimationProps) {
   return (
     <div
       ref={sectionRef}
-      className="h-screen w-full flex items-center justify-center bg-white"
+      className="min-h-[100vh] h-auto lg:h-screen w-full flex items-center justify-center bg-white py-12 lg:py-0"
       style={{
         scrollSnapAlign: "start",
         scrollSnapStop: "always",
-        minHeight: "100vh",
       }}
     >
       {!imagesLoaded ? (
@@ -154,7 +153,7 @@ export function ScrollAnimation({ category, product }: ScrollAnimationProps) {
           <p className="text-slate-600">Cargando experiencia...</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center w-full max-w-7xl px-4 lg:px-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center w-full max-w-7xl px-4 lg:px-20">
           {/* Animación */}
           <div className="flex items-center justify-center">
             <canvas
@@ -164,7 +163,7 @@ export function ScrollAnimation({ category, product }: ScrollAnimationProps) {
           </div>
 
           {/* Información */}
-          <div className="flex flex-col justify-center gap-8 text-center lg:text-left">
+          <div className="flex flex-col justify-center gap-6 sm:gap-8 text-center lg:text-left">
             {/* ✅ Título dinámico del producto */}
             <div
               className="transition-all duration-700"
@@ -173,7 +172,7 @@ export function ScrollAnimation({ category, product }: ScrollAnimationProps) {
                 transform: `translateY(${isVisible ? 0 : 30}px)`
               }}
             >
-              <h2 className="text-5xl lg:text-7xl font-black text-slate-900 leading-tight">
+              <h2 className="text-3xl sm:text-4xl lg:text-7xl font-black text-slate-900 leading-tight">
                 {productName}
               </h2>
             </div>
@@ -186,7 +185,7 @@ export function ScrollAnimation({ category, product }: ScrollAnimationProps) {
                 transform: `translateY(${isVisible ? 0 : 30}px)`
               }}
             >
-              <p className="text-4xl lg:text-5xl font-bold text-slate-400">
+              <p className="text-2xl sm:text-3xl lg:text-5xl font-bold text-slate-400">
                 {productPrice}
               </p>
             </div>
@@ -201,10 +200,10 @@ export function ScrollAnimation({ category, product }: ScrollAnimationProps) {
             >
               <Link
                 href={productUrl}
-                className="inline-flex items-center justify-center gap-3 px-10 py-5 bg-slate-900 text-white rounded-full font-black text-xl shadow-2xl hover:bg-slate-800 hover:scale-105 active:scale-95 transition-all w-fit mx-auto lg:mx-0"
+                className="inline-flex items-center justify-center gap-3 px-6 py-3 sm:px-10 sm:py-5 bg-slate-900 text-white rounded-full font-black text-lg sm:text-xl shadow-2xl hover:bg-slate-800 hover:scale-105 active:scale-95 transition-all w-fit mx-auto lg:mx-0"
               >
                 <span>{buttonText}</span>
-                <span className="text-2xl">→</span>
+                <span className="text-xl sm:text-2xl">→</span>
               </Link>
             </div>
           </div>

@@ -89,13 +89,14 @@ function QuickBuyCard({ product, categorySlug }: { product: ShopifyProduct; cate
                 >
                     {product.title}
                 </h3>
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <span className="text-base font-bold" style={{ color: "var(--color-accent)" }}>
                         {price}
                     </span>
                     <AddToCartButton
                         product={product}
                         variant="primary"
+                        className="w-full sm:w-auto"
                     >
                         ¡Lo quiero! →
                     </AddToCartButton>
