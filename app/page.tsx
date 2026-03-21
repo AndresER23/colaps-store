@@ -6,7 +6,7 @@ import { getCollectionProducts } from "@/lib/queries";
 
 const theme = themes.tecnologia;
 
-export default async function TecnologiaPage() {
+export default async function HomePage() {
   const [featured, products] = await Promise.all([
     getCollectionProducts("featured-tecnologia", 5),
     getCollectionProducts("tecnologia", 12),
