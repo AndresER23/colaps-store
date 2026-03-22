@@ -7,6 +7,7 @@ import type { ShopifyProduct } from "@/lib/queries";
 import { getProductImage } from "@/lib/queries";
 import { getSalePrice } from "@/lib/pricing";
 import { AddToCartButton } from "./AddToCartButton";
+import { ProductReviews } from "./ProductReviews";
 
 interface ProductDetailProps {
     product: ShopifyProduct;
@@ -304,6 +305,9 @@ export function ProductDetail({ product, categorySlug, relatedProducts = [] }: P
                     </div>
                 </div>
             )}
+
+            {/* Reseñas del producto */}
+            <ProductReviews productTitle={product.title} />
         </div>
     );
 }
