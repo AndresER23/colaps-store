@@ -7,6 +7,7 @@ export interface ShopifyProduct {
   title: string;
   handle: string;
   vendor: string;
+  productType: string;
   description: string;
   tags: string[];
   priceRange: {
@@ -51,6 +52,7 @@ const PRODUCT_FIELDS = `
   title
   handle
   vendor
+  productType
   description
   tags
   priceRange {

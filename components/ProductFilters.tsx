@@ -27,17 +27,23 @@ function getProductPrice(p: ShopifyProduct): number {
     return calcSalePrice(p.priceRange.minVariantPrice.amount);
 }
 
-function getAllTags(products: ShopifyProduct[]): string[] {
-    const tagCount = new Map<string, number>();
-    products.forEach((p) =>
+function getCategoryOptions(products: ShopifyProduct[]): string[] {
+    const categoryCount = new Map<string, number>();
+    products.forEach((p) => {
+        // Collect tags
         p.tags.forEach((t) => {
             const tag = t.trim();
-            if (tag) tagCount.set(tag, (tagCount.get(tag) || 0) + 1);
-        })
-    );
-    return Array.from(tagCount.entries())
+            if (tag) categoryCount.set(tag, (categoryCount.get(tag) || 0) + 1);
+        });
+        // Collect product type as a fallback/additional category
+        if (p.productType) {
+            const type = p.productType.trim();
+            if (type) categoryCount.set(type, (categoryCount.get(type) || 0) + 1);
+        }
+    });
+    return Array.from(categoryCount.entries())
         .sort((a, b) => b[1] - a[1])
-        .map(([tag]) => tag);
+        .map(([cat]) => cat);
 }
 
 // ─── Sort labels ──────────────────────────────────────────────────────────────
@@ -52,7 +58,7 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function ProductFilters({ products, onFilteredProducts }: ProductFiltersProps) {
-    const allTags = useMemo(() => getAllTags(products), [products]);
+    const allCategories = useMemo(() => getCategoryOptions(products), [products]);
 
     const priceExtent = useMemo(() => {
         if (products.length === 0) return [0, 1000000] as [number, number];
@@ -95,10 +101,10 @@ export function ProductFilters({ products, onFilteredProducts }: ProductFiltersP
             );
         }
 
-        // Tags
+        // Categories (Tags or Type)
         if (selectedTags.length > 0) {
             result = result.filter((p) =>
-                selectedTags.some((tag) => p.tags.includes(tag))
+                selectedTags.some((cat) => p.tags.includes(cat) || p.productType === cat)
             );
         }
 
@@ -279,7 +285,7 @@ export function ProductFilters({ products, onFilteredProducts }: ProductFiltersP
             <div className={`${showMobileFilters ? "block" : "hidden"} sm:block`}>
                 <div className="space-y-4">
                     {/* Category pills */}
-                    {allTags.length > 0 && (
+                    {allCategories.length > 0 && (
                         <div>
                             <p
                                 className="text-xs font-semibold uppercase tracking-wider mb-2"
@@ -288,7 +294,7 @@ export function ProductFilters({ products, onFilteredProducts }: ProductFiltersP
                                 Categorías
                             </p>
                             <div className="flex flex-wrap gap-2">
-                                {allTags.slice(0, 12).map((tag) => {
+                                {allCategories.slice(0, 12).map((tag) => {
                                     const isActive = selectedTags.includes(tag);
                                     return (
                                         <motion.button
