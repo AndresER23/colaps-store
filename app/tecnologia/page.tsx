@@ -3,6 +3,8 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { ProductGrid } from "@/components/ProductGrid";
 import { getCollectionProducts } from "@/lib/queries";
+import { EnhancedTrustSection } from "@/components/TrustBadges";
+import { CustomerReviews } from "@/components/CustomerReviews";
 
 const theme = themes.tecnologia;
 
@@ -23,6 +25,8 @@ export default async function TecnologiaPage() {
           categorySlug="tecnologia"
           title="Productos"
         />
+        <EnhancedTrustSection />
+        <CustomerReviews />
       </div>
     </ThemeProvider>
   );

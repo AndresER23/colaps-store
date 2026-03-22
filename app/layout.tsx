@@ -7,6 +7,7 @@ import { headers } from "next/headers";
 import { getTenantFromHost } from "@/lib/tenant";
 import { CartProvider } from "@/contexts/CartContext";
 import { CartDrawer } from "@/components/CartDrawer";
+import { WhatsAppFloatingButton } from "@/components/WhatsAppFloatingButton";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -27,6 +28,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main>{children}</main>
           <Footer storeName={tenant.name} />
           <CartDrawer />
+          <WhatsAppFloatingButton 
+            phoneNumber="573222844958"
+          />
         </CartProvider>
       </body>
     </html>

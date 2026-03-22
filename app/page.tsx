@@ -3,6 +3,9 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { ProductGrid } from "@/components/ProductGrid";
 import { getCollectionProducts } from "@/lib/queries";
+// En layout.tsx está el WhatsAppFloatingButton
+import { CustomerReviews } from "../components/CustomerReviews";
+import { EnhancedTrustSection } from "@/components/TrustBadges";
 
 const theme = themes.tecnologia;
 
@@ -26,6 +29,8 @@ export default async function HomePage() {
           categorySlug="tecnologia"
           title="Productos"
         />
+        <EnhancedTrustSection />
+        <CustomerReviews />
       </div>
     </ThemeProvider>
   );
