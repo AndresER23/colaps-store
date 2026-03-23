@@ -91,7 +91,7 @@ export const authOptions: NextAuthOptions = {
     async redirect({ url, baseUrl }) {
       if (url.includes('/checkout')) return url;
       if (url.startsWith(baseUrl)) return url;
-      return `${baseUrl}/cuenta`;
+      return `${baseUrl}/user`;
     },
   },
 
