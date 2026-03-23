@@ -23,6 +23,12 @@ export function middleware(request: NextRequest) {
     const pathParts = pathname.split("/").filter(Boolean);
     const firstSegment = pathParts[0];
 
+    // Rutas globales permitidas (sin redirección)
+    const globalRoutes = ["user", "cuenta", "checkout", "auth", "bienvenido"];
+    if (firstSegment && globalRoutes.includes(firstSegment)) {
+      return NextResponse.next();
+    }
+
     // Si la ruta raíz, redirigir a una categoría por defecto
     if (pathname === "/") {
       return NextResponse.redirect(new URL("/tecnologia", request.url));

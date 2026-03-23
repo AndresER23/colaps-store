@@ -31,8 +31,8 @@ export const themes: Record<CategorySlug, CategoryTheme> = {
     cardBg: "#1d1d1f",
     gradient: "linear-gradient(135deg, #0071e3 0%, #00c7ff 100%)",
     radiusCard: "16px",
-    fontDisplay: "'SF Pro Display', 'Helvetica Neue', sans-serif",
-    fontBody: "'SF Pro Text', 'Helvetica Neue', sans-serif",
+    fontDisplay: "var(--font-outfit), sans-serif",
+    fontBody: "var(--font-jakarta), sans-serif",
   },
   belleza: {
     slug: "belleza",

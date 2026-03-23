@@ -11,8 +11,8 @@
   --color-text-muted: #6b6b6b;
   --color-card-bg: #ffffff;
   --radius-card: 16px;
-  --font-display: "Inter", sans-serif;
-  --font-body: "Inter", sans-serif;
+  --font-display: var(--font-outfit), "Inter", sans-serif;
+  --font-body: var(--font-jakarta), "Inter", sans-serif;
 }
 
 * {
