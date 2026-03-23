@@ -44,7 +44,7 @@ const REVIEW_POOL: Record<string, Review[]> = {
     ],
 };
 
-function getReviewsForProduct(title: string): Review[] {
+export function getReviewsForProduct(title: string): Review[] {
     // Try exact match first, then partial match
     if (REVIEW_POOL[title]) return REVIEW_POOL[title];
     const key = Object.keys(REVIEW_POOL).find(
@@ -55,7 +55,7 @@ function getReviewsForProduct(title: string): Review[] {
 
 // ─── Stars Component ──────────────────────────────────────────────────────────
 
-function Stars({ rating, size = "text-sm", interactive = false, onChange }: {
+export function Stars({ rating, size = "text-sm", interactive = false, onChange }: {
     rating: number;
     size?: string;
     interactive?: boolean;

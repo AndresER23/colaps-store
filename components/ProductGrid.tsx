@@ -9,6 +9,7 @@ import { getProductImage } from "@/lib/queries";
 import { getSalePrice, getSaleDiscount } from "@/lib/pricing";
 import { AddToCartButton } from "./AddToCartButton";
 import { ProductFilters } from "./ProductFilters";
+import { Stars, getReviewsForProduct } from "./ProductReviews";
 
 interface ProductGridProps {
     products: ShopifyProduct[];
@@ -25,6 +26,9 @@ function QuickBuyCard({ product, categorySlug }: { product: ShopifyProduct; cate
         product.priceRange.minVariantPrice.amount,
         product.compareAtPriceRange.minVariantPrice.amount
     );
+
+    const reviews = getReviewsForProduct(product.title);
+    const avgRating = reviews.reduce((a, r) => a + r.rating, 0) / reviews.length;
 
     return (
         <motion.div
@@ -87,11 +91,14 @@ function QuickBuyCard({ product, categorySlug }: { product: ShopifyProduct; cate
                         </p>
                     )}
                     <h3
-                        className="text-sm font-semibold line-clamp-2 leading-snug mb-3"
+                        className="text-sm font-semibold line-clamp-2 leading-snug mb-1"
                         style={{ fontFamily: "var(--font-display)", color: "var(--color-text)" }}
                     >
                         {product.title}
                     </h3>
+                    <div className="mb-3">
+                        <Stars rating={Math.round(avgRating)} size="text-[10px]" />
+                    </div>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                         <span className="text-base font-bold" style={{ color: "var(--color-accent)" }}>
                             {price}
@@ -118,7 +125,7 @@ export function ProductGrid({ products, categorySlug, title }: ProductGridProps)
     }, []);
 
     return (
-        <section className="px-6 py-8 max-w-[1280px] mx-auto">
+        <section id="productos" className="px-6 py-8 max-w-[1280px] mx-auto">
             {title && (
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">

@@ -1,0 +1,175 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // o "mysql" o "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// MODELOS DE NEXTAUTH (Necesarios)
+// ============================================
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  hashedPassword String?  // Para login con email/password
+  
+  // Campos adicionales para e-commerce
+  phone         String?
+  address       String?
+  city          String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relaciones
+  accounts      Account[]
+  sessions      Session[]
+  orders        Order[]
+  favorites     Favorite[]
+  cart          CartItem[]
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ============================================
+// MODELOS DE E-COMMERCE
+// ============================================
+
+model Order {
+  id              String   @id @default(cuid())
+  orderNumber     String   @unique
+  
+  // Usuario (opcional - puede ser invitado)
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id])
+  
+  // Datos del comprador (siempre presentes, incluso para invitados)
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  shippingAddress String
+  shippingCity    String
+  
+  // Datos del pedido
+  total           Float
+  status          OrderStatus @default(PENDING)
+  paymentMethod   PaymentMethod
+  
+  // Tracking
+  trackingNumber  String?
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relaciones
+  items           OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String @id @default(cuid())
+  orderId     String
+  order       Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  productId   String
+  productName String
+  quantity    Int
+  price       Float
+  
+  @@map("order_items")
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  productId String
+  
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, productId])
+  @@map("favorites")
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  productId String
+  quantity  Int
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, productId])
+  @@map("cart_items")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CONTRAENTREGA
+  CARD
+  PSE
+  NEQUI
+  DAVIPLATA
+}

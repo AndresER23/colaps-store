@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ShopifyProduct } from "@/lib/queries";
 import { formatPrice, getProductImage, hasDiscount } from "@/lib/queries";
+import { Stars, getReviewsForProduct } from "./ProductReviews";
 
 interface ProductCardProps {
   product: ShopifyProduct;
@@ -24,6 +25,9 @@ export function ProductCard({ product, categorySlug }: ProductCardProps) {
   const comparePrice = isOnSale
     ? formatPrice(product.compareAtPriceRange.minVariantPrice.amount)
     : null;
+
+  const reviews = getReviewsForProduct(product.title);
+  const avgRating = reviews.reduce((a, r) => a + r.rating, 0) / reviews.length;
 
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -81,6 +85,10 @@ export function ProductCard({ product, categorySlug }: ProductCardProps) {
       >
         {product.title}
       </h3>
+
+      <div className="mb-2">
+        <Stars rating={Math.round(avgRating)} size="text-[10px]" />
+      </div>
 
       {product.tags.length > 0 && (
         <p className="text-[11px] text-[var(--color-text-muted)] mb-3">

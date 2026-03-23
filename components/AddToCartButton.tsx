@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useCart } from "@/contexts/CartContext";
 import type { ShopifyProduct } from "@/lib/queries";
+import { useTracking } from "@/components/RemarketingScripts";
 
 interface AddToCartButtonProps {
   product: ShopifyProduct;
@@ -24,6 +25,7 @@ export function AddToCartButton({
   const { addItem, openCart } = useCart();
   const [isAdding, setIsAdding] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
+  const { trackEvent } = useTracking();
 
   // Usar la primera variante si no se especifica
   const selectedVariantId =
@@ -43,6 +45,12 @@ export function AddToCartButton({
     addItem(product, selectedVariantId, quantity);
     setIsAdding(false);
     setJustAdded(true);
+
+    trackEvent("AddToCart", {
+      content_name: product.title,
+      value: product.priceRange.minVariantPrice.amount,
+      currency: product.priceRange.minVariantPrice.currencyCode,
+    });
 
     // Abrir carrito después de agregar
     setTimeout(() => {

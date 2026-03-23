@@ -1,0 +1,12 @@
+$envVars = @{
+    "DATABASE_URL" = "postgres://025abe5be5e10bf43a087fd4ede54e721105b83767ac3de3083d94f514a0abff:sk_ZaDflsilPcz_3ZWkvTcBP@db.prisma.io:5432/postgres?sslmode=require"
+    "PRISMA_DATABASE_URL" = "postgres://025abe5be5e10bf43a087fd4ede54e721105b83767ac3de3083d94f514a0abff:sk_ZaDflsilPcz_3ZWkvTcBP@db.prisma.io:5432/postgres?sslmode=require"
+    "NEXT_PUBLIC_GA_ID" = "G-WS8NJXHDH1"
+    "NEXT_PUBLIC_META_PIXEL_ID" = "3086637538197950"
+    "NEXTAUTH_SECRET" = "e42e88a0b0f7e4e09f7a6f3b01859942a0a2df4a5fdbf72c35a6b0c2a71d7c4"
+    "NEXTAUTH_URL" = "https://colaps-store.vercel.app"
+}
+foreach ($key in $envVars.Keys) {
+    npx vercel env rm $key production -y
+    echo $envVars[$key] | npx vercel env add $key production
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { ShopifyProduct } from "@/lib/queries";
@@ -95,6 +95,39 @@ export function HeroCarousel({ theme, products }: HeroCarouselProps) {
     goTo((current - 1 + products.length) % products.length, "prev");
   }, [current, products.length, goTo]);
 
+  // Touch swipe support
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const touchEndX = useRef(0);
+  const touchEndY = useRef(0);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    touchEndX.current = e.touches[0].clientX;
+    touchEndY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+    touchEndY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    const deltaX = touchStartX.current - touchEndX.current;
+    const deltaY = touchStartY.current - touchEndY.current;
+    const minSwipeDistance = 50;
+
+    // Only trigger if horizontal swipe is larger than vertical (prevents conflict with scrolling)
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+      if (deltaX > 0) {
+        goNext(); // Swiped left → next
+      } else {
+        goPrev(); // Swiped right → prev
+      }
+    }
+  }, [goNext, goPrev]);
+
   useEffect(() => {
     if (products.length <= 1) return;
     const timer = setInterval(goNext, 5000);
@@ -124,6 +157,9 @@ export function HeroCarousel({ theme, products }: HeroCarouselProps) {
   return (
     <section
       className="relative overflow-hidden mx-4 my-4 rounded-3xl"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
       style={{
         background: "linear-gradient(135deg, #0a0a0f 0%, #111827 100%)",
         border: "1px solid rgba(255,59,48,0.2)",
