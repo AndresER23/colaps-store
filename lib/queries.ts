@@ -70,7 +70,7 @@ const PRODUCT_FIELDS = `
     edges {
       node {
         id
-        url
+        url(transform: { maxWidth: 2048, maxHeight: 2048 })
         altText
       }
     }

@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ShopifyProduct } from "@/lib/queries";
 import { formatPrice, getProductImage, hasDiscount } from "@/lib/queries";
+import { getShopifyImageUrl } from "@/lib/shopify-images";
 import { Stars, getReviewsForProduct } from "./ProductReviews";
 
 interface ProductCardProps {
@@ -16,7 +17,8 @@ export function ProductCard({ product, categorySlug }: ProductCardProps) {
   const [hovered, setHovered] = useState(false);
   const [added, setAdded] = useState(false);
 
-  const imageUrl = getProductImage(product);
+  const baseImageUrl = getProductImage(product);
+  const imageUrl = getShopifyImageUrl(baseImageUrl, { width: 600 });
   const price = formatPrice(
     product.priceRange.minVariantPrice.amount,
     product.priceRange.minVariantPrice.currencyCode
@@ -71,6 +73,7 @@ export function ProductCard({ product, categorySlug }: ProductCardProps) {
             className="object-cover transition-transform duration-500"
             style={{ transform: hovered ? "scale(1.05)" : "scale(1)" }}
             sizes="(max-width: 768px) 100vw, 33vw"
+            quality={85}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">

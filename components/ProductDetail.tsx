@@ -9,6 +9,7 @@ import { getSalePrice } from "@/lib/pricing";
 import { AddToCartButton } from "./AddToCartButton";
 import { ProductReviews } from "./ProductReviews";
 import { useTracking } from "@/components/RemarketingScripts";
+import { getShopifyImageUrl } from "@/lib/shopify-images";
 
 interface ProductDetailProps {
     product: ShopifyProduct;
@@ -63,12 +64,13 @@ export function ProductDetail({ product, categorySlug, relatedProducts = [] }: P
                     >
                         {images[selectedImage] ? (
                             <Image
-                                src={images[selectedImage].url}
+                                src={getShopifyImageUrl(images[selectedImage].url, { width: 1200 })}
                                 alt={images[selectedImage].altText || product.title}
                                 fill
                                 className="object-contain p-6"
                                 sizes="(max-width: 768px) 100vw, 50vw"
                                 priority
+                                quality={100}
                             />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center">
@@ -90,7 +92,14 @@ export function ProductDetail({ product, categorySlug, relatedProducts = [] }: P
                                         opacity: selectedImage === i ? 1 : 0.6,
                                     }}
                                 >
-                                    <Image src={img.url} alt={`Imagen ${i + 1}`} fill className="object-contain p-1" sizes="64px" />
+                                    <Image 
+                                        src={getShopifyImageUrl(img.url, { width: 200 })} 
+                                        alt={`Imagen ${i + 1}`} 
+                                        fill 
+                                        className="object-contain p-1" 
+                                        sizes="64px" 
+                                        quality={80}
+                                    />
                                 </button>
                             ))}
                             {images.length > 4 && (
