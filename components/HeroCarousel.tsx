@@ -280,8 +280,9 @@ export function HeroCarousel({ theme, products }: HeroCarouselProps) {
             className="absolute inset-0 rounded-2xl blur-2xl"
             style={{ background: "radial-gradient(circle, rgba(255,59,48,0.15) 0%, transparent 70%)" }}
           />
-          <div
-            className="relative w-full max-w-sm aspect-square rounded-2xl overflow-hidden"
+          <Link
+            href={`/${theme.slug}/${product.handle}`}
+            className="relative w-full max-w-sm aspect-square rounded-2xl overflow-hidden block group"
             style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
           >
             {imageUrl ? (
@@ -289,14 +290,14 @@ export function HeroCarousel({ theme, products }: HeroCarouselProps) {
                 src={imageUrl}
                 alt={product.title}
                 fill
-                className="object-contain p-6 hover:scale-105 transition-transform duration-500"
+                className="object-contain p-6 group-hover:scale-105 transition-transform duration-500"
                 sizes="(max-width: 768px) 100vw, 50vw"
                 priority
               />
             ) : (
               <span className="text-8xl opacity-10 absolute inset-0 flex items-center justify-center">📦</span>
             )}
-          </div>
+          </Link>
 
           {/* Badge de descuento flotante */}
           {discountPct && (
