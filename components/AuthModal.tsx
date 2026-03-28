@@ -27,7 +27,7 @@ export function AuthModal({ isOpen, onClose, defaultView = "login", redirectTo }
     setIsLoading(true);
     try {
       await signIn("google", { 
-        callbackUrl: redirectTo || "/cuenta" 
+        callbackUrl: redirectTo || "/user" 
       });
     } catch (err) {
       setError("Error al iniciar sesión con Google");
@@ -51,7 +51,7 @@ export function AuthModal({ isOpen, onClose, defaultView = "login", redirectTo }
       if (result?.error) {
         setError("Email o contraseña incorrectos");
       } else {
-        window.location.href = redirectTo || "/cuenta";
+        window.location.href = redirectTo || "/user";
       }
     } catch (err) {
       setError("Error al iniciar sesión");
